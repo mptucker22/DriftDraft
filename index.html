@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <div class="container mx-auto p-8">
+        <div class="flex flex-wrap">
+            <!-- Welcome message -->
+            <div class="w-full text-center p-3">
+                <span class="text-lg text-gray-700">Welcome, player!</span>
+            </div>
+            <!-- Drawing canvas area -->
+            <div class="w-full lg:w-3/4 p-3">
+                <div class="bg-white border rounded shadow">
+                    <div class="border-b p-3">
+                        <h5 class="font-bold uppercase text-gray-600">Drawing Area</h5>
+                    </div>
+                    <div class="p-5">
+                        <!-- Canvas for drawing -->
+                        <canvas id="drawingCanvas" class="bg-gray-300 w-full"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Control buttons -->
+            <div class="w-full lg:w-1/4 p-3">
+                <div class="bg-white border rounded shadow">
+                    <div class="border-b p-3">
+                        <h5 class="font-bold uppercase text-gray-600">Controls</h5>
+                    </div>
+                    <div class="p-5 flex flex-wrap">
+                        <button id="endTurn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded m-1 w-full">End Turn</button>
+                        <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded m-1 w-full">Undo</button>
+                        <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded m-1 w-full">Redo</button>
+                        <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded m-1 w-full">Poly</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Corrected JavaScript for drawing with proper canvas scaling
+        window.onload = function () {
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            let playerOneTurn = true; // Player one starts
+            
+            // Set the canvas dimensions to match the CSS styled size
+            function resizeCanvas() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+
+            // Get the cursor position accounting for canvas scaling
+            function getCursorPosition(canvas, event) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;    // relationship bitmap vs. element for X
+                const scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
+                const x = (event.clientX - rect.left) * scaleX;
+                const y = (event.clientY - rect.top) * scaleY;
+                return { x, y };
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            canvas.addEventListener('mousedown', (e) => {
+                const { x, y } = getCursorPosition(canvas, e);
+                drawing = true;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (drawing) {
+                    const { x, y } = getCursorPosition(canvas, e);
+                    ctx.lineTo(x, y);
+                    ctx.strokeStyle = playerOneTurn ? 'blue' : 'red';
+                    ctx.stroke();
+                }
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                drawing = false;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                drawing = false;
+            });
+
+            // Switch turns when the "End Turn" button is clicked
+            document.getElementById('endTurn').addEventListener('click', () => {
+                playerOneTurn = !playerOneTurn;
+                document.getElementById('endTurn').classList.toggle('bg-blue-500', playerOneTurn);
+                document.getElementById('endTurn').classList.toggle('bg-red-500', !playerOneTurn);
+            });
+        };
+    </script>
+</body>
+</html>
